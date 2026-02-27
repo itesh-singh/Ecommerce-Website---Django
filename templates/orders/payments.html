@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<section class="section-content padding-y bg">
+  <div class="container">
+    <div class="row">
+
+      <!-- ========== LEFT COLUMN - ORDER DETAILS ========== -->
+      <aside class="col-lg-8">
+
+        <!-- Billing Address Card -->
+        <div class="card">
+          <h5 class="card-header">Billing Address</h5>
+          <div class="card-body">
+            <p class="card-text">With supporting text below as a natural lead-in to additi</p>
+          </div>
+        </div>
+        <!-- Billing Address Card END -->
+
+        <!-- Payment Method Card -->
+        <div class="card">
+          <h5 class="card-header">Payment Method</h5>
+          <div class="card-body">
+            <p class="card-text">With supporting text below as a natural lead-in to additi</p>
+          </div>
+        </div>
+        <!-- Payment Method Card END -->
+
+        <!-- Review Products Card -->
+        <div class="card">
+          <h5 class="card-header">Review Products</h5>
+          <div class="card-body">
+            <p class="card-text">With supporting text below as a natural lead-in to additi</p>
+          </div>
+        </div>
+        <!-- Review Products Card END -->
+
+      </aside>
+      <!-- LEFT COLUMN END -->
+
+      <!-- ========== RIGHT COLUMN - ORDER SUMMARY ========== -->
+      <aside class="col-lg-4">
+        <div class="card">
+          <div class="card-body">
+
+            <!-- Price Breakdown -->
+            <dl class="dlist-align">
+              <dt>Total price:</dt>
+              <dd class="text-right">${{ total }}</dd>
+            </dl>
+            <dl class="dlist-align">
+              <dt>Tax:</dt>
+              <dd class="text-right">${{ tax }}</dd>
+            </dl>
+            <dl class="dlist-align">
+              <dt>Grand Total:</dt>
+              <dd class="text-right text-dark b"><strong>${{ grand_total }}</strong></dd>
+            </dl>
+            <!-- Price Breakdown END -->
+
+            <hr>
+
+            <!-- Payment Icons -->
+            <p class="text-center mb-3">
+              <img src="{% static './images/misc/payments.png' %}" height="26">
+            </p>
+            <!-- Payment Icons END -->
+
+            <!-- Make Payment Button -->
+            <a href="{% url 'checkout' %}" class="btn btn-primary btn-block">Make Payment</a>
+
+          </div>
+        </div>
+      </aside>
+      <!-- RIGHT COLUMN END -->
+
+    </div>
+  </div>
+</section>
+
+{% endblock %}
