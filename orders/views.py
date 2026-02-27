@@ -4,6 +4,7 @@ from carts.models import CartItem
 from .forms import OrderForm
 import datetime
 from .models import Order
+import os
 
 
 def payments(request):
@@ -63,6 +64,7 @@ def place_order(request, total=0, quantity=0):
                 'total': total,
                 'tax': tax,
                 'grand_total': grand_total,
+                'client_id': os.getenv('PAYPAL_CLIENT_ID'),
             }    
             return render(request, 'orders/payments.html', context)
         else:
