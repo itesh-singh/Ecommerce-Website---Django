@@ -27,7 +27,7 @@
         <div class="card">
           <h5 class="card-header">Payment Method</h5>
           <div class="card-body">
-            <p class="card-text">PhonePe</p>
+            <p class="card-text">PayPal</p>
           </div>
         </div>
         <!-- Payment Method Card END -->
@@ -109,16 +109,18 @@
             <!-- Payment Icons -->
             <p class="text-center mb-3">
               <img
-                src="{% static './images/misc/payments.png' %}"
+                src="{% static 'images/misc/payments.png' %}"
                 height="26"
               />
             </p>
             <!-- Payment Icons END -->
 
             <!-- Make Payment Button -->
-            <a href="{% url 'checkout' %}" class="btn btn-primary btn-block"
-              >Make Payment</a
-            >
+            
+
+          <div id="paypal-button-container">
+            <!-- PayPal button will load -->
+          </div>
           </div>
         </div>
       </aside>
@@ -126,5 +128,38 @@
     </div>
   </div>
 </section>
+
+<script src="https://www.paypal.com/sdk/js?client-id={{ client_id }}&currency=USD"></script>
+<script>
+
+  var amount = "{{ grand_total }}";
+
+    paypal.Buttons({
+
+      style: {
+          color: 'blue',
+          shape: 'rect',
+          height: 40,
+          label: 'pay'
+          },
+
+        createOrder: function(data, actions) {
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        value: amount,
+                    }
+                }]
+            });
+        },
+
+        onApprove: function(data, actions) {
+            return actions.order.capture().then(function(details) {
+              console.log(details);
+              alert('Transaction completed by ' + details.payer.name.given_name + '!');
+            });
+        }
+    }).render('#paypal-button-container');
+</script>
 
 {% endblock %}
