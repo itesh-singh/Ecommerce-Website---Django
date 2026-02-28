@@ -8,6 +8,11 @@ import os
 import json
 from django.db import transaction, IntegrityError
 from django.contrib.auth.decorators import login_required
+from store.models import Product
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
+from django.utils import timezone
+
 
 
 @login_required
@@ -50,8 +55,7 @@ def payments(request):
 
         # check stock BEFORE saving anything
         if product.stock < item.quantity:
-            return JsonResponse({'error': 'Insufficient stock'}, status=400)
-
+            raise IntegrityError("Insufficient stock")
         orderproduct = OrderProduct(
             order_id=order.id,
             payment=payment,
@@ -62,18 +66,34 @@ def payments(request):
             ordered=True,
         )
         orderproduct.save()
+        
+        cart_item = CartItem.objects.get(id=item.id)
+        product_variation = cart_item.variations.all()
+        orderproduct = OrderProduct.objects.get(id=orderproduct.id)
+        orderproduct.variations.set(product_variation)
+        orderproduct.save()
 
-        # reduce stock
+        # reduce the quantity of sold products
+        product = Product.objects.get(id=item.product_id)
         product.stock -= item.quantity
         product.save()
-
-
-    # reduce the quantity of sold products
-
+        
     # clear cart
     CartItem.objects.filter(user=request.user).delete()
 
     # send order recieved email to customer
+    mail_subject = 'Thank you for order!'
+    message = render_to_string('orders/order_received_email.html',{
+        'user': request.user,
+        'order': order,
+        'payment': payment,
+        'now': timezone.now(),
+    })
+    to_email = request.user.email
+
+    send_email = EmailMessage(mail_subject, message, to=[to_email])
+    send_email.content_subtype = "html" 
+    send_email.send()    
 
     # send order number and transaction id back to sendData method via JsonResponse
 

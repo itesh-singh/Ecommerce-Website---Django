@@ -1,0 +1,88 @@
+<!--autoescape protect you form account forgery-->
+{% autoescape off %}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Order Confirmation</title>
+</head>
+
+<body style="font-family: Arial, sans-serif; background:#f5f5f5; padding:20px;">
+
+<table width="100%" cellspacing="0" cellpadding="0">
+<tr>
+<td align="center">
+
+<table width="600" style="background:#ffffff; padding:30px; border-radius:8px;">
+
+```
+<tr>
+    <td align="center">
+        <h2 style="color:#333;">✅ Order Confirmed</h2>
+    </td>
+</tr>
+
+<tr>
+    <td>
+        <p>Hi <strong>{{ user.first_name }}</strong>,</p>
+
+        <p>
+            Thank you for your purchase. Your order has been successfully received 
+            and is now being processed.
+        </p>
+    </td>
+</tr>
+
+<tr>
+    <td style="background:#f8f8f8; padding:15px; border-radius:6px;">
+        <p><strong>Order Number:</strong> {{ order.order_number }}</p>
+        <p><strong>Transaction ID:</strong> {{ payment.payment_id }}</p>
+        <p><strong>Payment Method:</strong> {{ payment.payment_method }}</p>
+        <p><strong>Total Amount:</strong> ${{ order.order_total }}</p>
+    </td>
+</tr>
+
+<tr>
+    <td>
+        <h4>Shipping Address</h4>
+        <p>
+            {{ order.first_name }} {{ order.last_name }}<br>
+            {{ order.address_line_1 }}<br>
+            {{ order.address_line_2 }}<br>
+            {{ order.city }}, {{ order.state }}<br>
+            {{ order.country }}
+        </p>
+    </td>
+</tr>
+
+<tr>
+    <td>
+        <p>
+            We will notify you once your order is shipped.
+            If you have any questions, simply reply to this email.
+        </p>
+
+        <p style="margin-top:30px;">
+            Thank you for shopping with us ❤️
+        </p>
+    </td>
+</tr>
+
+<tr>
+    <td align="center" style="padding-top:20px; font-size:12px; color:#888;">
+        © {{ now|date:"Y" }} GreatKart. All rights reserved.
+    </td>
+</tr>
+```
+
+</table>
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>
+{% endautoescape %}
