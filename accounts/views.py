@@ -6,7 +6,14 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from orders.models import Order
 
-# Varification Email
+# Security
+from django.contrib.auth import update_session_auth_hash
+import uuid
+from urllib.parse import urlparse, parse_qs
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+
+# Verification Email
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -29,16 +36,16 @@ def register(request):
             phone_number = form.cleaned_data['phone_number']
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
-            username = email.split("@")[0]
+            username = email.split("@")[0] + str(uuid.uuid4())[:5]
             user = Account.objects.create_user(first_name=first_name, last_name=last_name, email=email, username=username, password=password)
             user.phone_number = phone_number
             user.save()
 
             # Create User Profile
-            profile = UserProfile()
-            profile.user_id = user.id
-            profile.profile_picture = 'default/default-user.png'
-            profile.save()
+            UserProfile.objects.create(
+                user=user,
+                profile_picture='default/default-user.png'
+            )
 
             # User Activation
             current_site = get_current_site(request)
@@ -107,19 +114,17 @@ def login(request):
                             for item in cart_item:
                                 item.user = user
                                 item.save()
-            except:
+            except Exception:
                 pass
             auth.login(request, user)
             messages.success(request, 'You are now logged in.')
             url = request.META.get('HTTP_REFERER')
             try:
-                query = requests.utils.urlparse(url).query
-                # next=/cart/checkout/
-                params = dict(x.split('=') for x in query.split('&'))
+                parsed_url = urlparse(url)
+                params = parse_qs(parsed_url.query)
                 if 'next' in params:
-                    nextPage = params['next']
-                    return redirect(nextPage)
-            except:
+                    return redirect(params['next'][0])
+            except Exception:
                 return redirect('dashboard')
         else:
             messages.error(request, 'Invalid login credentials')
@@ -143,7 +148,7 @@ def activate(request, uidb64, token):
     if user is not None and default_token_generator.check_token(user, token):
         user.is_active = True
         user.save()
-        messages.success(request, 'Congralulations! Your account is activated.')
+        messages.success(request, 'Congratulations! Your account is activated.')
         return redirect('login')
     else:
         messages.error(request, 'Invalid activation link')
@@ -210,6 +215,13 @@ def resetPassword(request):
         if password == confirm_password:
             uid = request.session.get('uid')
             user = Account.objects.get(pk=uid)
+
+            try:
+                validate_password(password, user)
+            except ValidationError as e:
+                messages.error(request, e.messages[0])
+                return redirect('resetPassword')
+
             user.set_password(password)
             user.save()
             messages.success(request, 'Password reset successful')
@@ -219,7 +231,8 @@ def resetPassword(request):
             return redirect('resetPassword')
     else:
         return render(request, 'accounts/resetPassword.html')
-    
+
+@login_required(login_url='login')    
 def my_orders(request):
     orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
     context = {
@@ -227,6 +240,7 @@ def my_orders(request):
     }
     return render(request, 'accounts/my_orders.html', context)
 
+@login_required(login_url='login')
 def edit_profile(request):
     userprofile = get_object_or_404(UserProfile, user=request.user)
     if request.method == 'POST':
@@ -246,3 +260,44 @@ def edit_profile(request):
         'userprofile': userprofile,
     }
     return render(request, 'accounts/edit_profile.html', context)
+
+
+@login_required(login_url='login')
+def change_password(request):
+    if request.method == 'POST':
+        current_password = request.POST['current_password']
+        new_password = request.POST['new_password']
+        confirm_password = request.POST['confirm_password']
+
+        user = request.user
+
+        # Validate current password
+        if not user.check_password(current_password):
+            messages.error(request, 'Please enter valid current password')
+            return redirect('change_password')
+
+        # Prevent same password reuse
+        if user.check_password(new_password):
+            messages.error(request, 'New password cannot be the same as current password.')
+            return redirect('change_password')
+
+        # Confirm new passwords match
+        if new_password != confirm_password:
+            messages.error(request, 'Password does not match!')
+            return redirect('change_password')
+
+        # Validate password strength
+        try:
+            validate_password(new_password, user)
+        except ValidationError as e:
+            messages.error(request, e.messages[0])
+            return redirect('change_password')
+
+        # Save new password
+        user.set_password(new_password)
+        user.save()
+        update_session_auth_hash(request, user)
+        messages.success(request, 'Password updated successfully.')
+        return redirect('change_password')
+
+    return render(request, 'accounts/change_password.html')
