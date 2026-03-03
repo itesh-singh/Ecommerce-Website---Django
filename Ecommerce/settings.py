@@ -19,7 +19,7 @@ load_dotenv()
 # --------------------------------------------------
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
-DEBUG = os.getenv("DEBUG", "True") == "True"
+DEBUG = os.getenv("DEBUG") == "True"
 
 ALLOWED_HOSTS = []
 
@@ -111,8 +111,8 @@ USE_TZ = True
 # --------------------------------------------------
 # Static files
 # --------------------------------------------------
-STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'static'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
     BASE_DIR / 'Ecommerce/static',
 ]
