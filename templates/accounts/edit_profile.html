@@ -16,8 +16,8 @@
           <header class="card-header">
             <strong>Edit your profile</strong>
           </header>
-
-              <div class="text-center">
+            <div class="card-body">
+              <div class="float-right">
                 {% if userprofile.profile_picture %}
                     <img src="{{ userprofile.profile_picture.url }}"
                     class="rounded-circle"
@@ -95,6 +95,7 @@
               <button type="submit" class="btn btn-primary">Save</button>
             </form>
           </div>
+        </div>
         </article>
       </main>
     </div>
