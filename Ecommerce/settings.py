@@ -33,12 +33,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
     'category',
     'accounts',
     'store',
     'carts',
     'orders',
+    'admin_honeypot',
 ]
 
 # --------------------------------------------------
