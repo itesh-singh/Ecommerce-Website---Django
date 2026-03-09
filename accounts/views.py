@@ -125,10 +125,12 @@ def login(request):
                 if 'next' in params:
                     return redirect(params['next'][0])
             except Exception:
-                return redirect('dashboard')
+                pass
+            return redirect('dashboard')
         else:
             messages.error(request, 'Invalid login credentials')
             return redirect('login')
+        
     return render(request, 'accounts/login.html')
 
 
